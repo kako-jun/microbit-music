@@ -39,10 +39,10 @@ def shift_note(note, shift):
 
 
 def display_pitch(note):
-    """音の高さをLEDバー表示"""
+    """音の高さをLEDバー表示（5列すべてを使用）"""
     pitch = note[:-1]
     idx = notes.index(pitch)
-    col = idx // 3  # 12音階を5列に分割
+    col = idx * 5 // 12  # 12音階を5列に均等分配（0-4）
     level = (idx % 3) + 1  # 簡易高さ（1～3）
 
     img = Image('00000:'*5)
@@ -68,7 +68,7 @@ def prev_song():
 
 
 # メインループ
-display.scroll("Ready")
+display.scroll(song_names[current_song_index])
 
 while True:
     # ボタン入力チェック
@@ -82,8 +82,9 @@ while True:
             # A長押し：前の曲
             prev_song()
         else:
-            # A短押し：半音下げ
-            shift -= 1
+            # A短押し：半音下げ（下限-12）
+            if shift > -12:
+                shift -= 1
             display.scroll("Key: " + str(shift))
     elif button_b.is_pressed():
         sleep(800)
@@ -91,18 +92,20 @@ while True:
             # B長押し：次の曲
             next_song()
         else:
-            # B短押し：半音上げ
-            shift += 1
+            # B短押し：半音上げ（上限+12）
+            if shift < 12:
+                shift += 1
             display.scroll("Key: " + str(shift))
 
     # 曲を演奏
     for n in songs[song_names[current_song_index]]:
         base_note = n.split(':')[0]
         length = n.split(':')[1]
-        new_note = shift_note(base_note, shift) + ':' + length
+        shifted = shift_note(base_note, shift)
+        new_note = shifted + ':' + length
 
-        # LED表示
-        display_pitch(base_note)
+        # LED表示（キー変更後の音を表示）
+        display_pitch(shifted)
 
         # 音を再生
         music.play(new_note, wait=True)
