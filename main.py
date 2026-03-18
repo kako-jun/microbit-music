@@ -2,15 +2,32 @@ from microbit import *
 import music
 
 # 曲データ辞書
+# DQ序曲: ドラゴンクエスト序曲マーチ冒頭（Bb major → C major に移調）
+# FF序曲: ファイナルファンタジー プレリュード（C major アルペジオ）
 songs = {
     "DQ序曲": [
-        'G4:2', 'C5:2', 'E5:2', 'G5:2', 'C6:4',
-        'C4:4', 'D4:4', 'E4:4', 'F4:4', 'G4:4', 'A4:4', 'B4:4', 'C5:4',
-        'G4:4', 'E4:4', 'C4:4'
+        # 序曲マーチ: ファンファーレ冒頭
+        'C5:1', 'C5:1', 'C5:1', 'C5:4',
+        'C5:1', 'D5:1', 'E5:1', 'F5:1', 'G5:4',
+        'G5:1', 'F5:1', 'E5:1', 'F5:1', 'E5:1', 'D5:1',
+        'C5:2', 'D5:2', 'E5:4',
+        # マーチ主題
+        'E5:1', 'E5:1', 'E5:1', 'E5:4',
+        'E5:1', 'F5:1', 'G5:1', 'A5:1', 'B5:4',
+        'B5:1', 'A5:1', 'G5:1', 'A5:1', 'G5:1', 'F5:1',
+        'E5:2', 'F5:2', 'G5:4',
     ],
     "FF序曲": [
-        'C4:2', 'E4:2', 'G4:2', 'C5:2', 'E5:2', 'G5:2', 'C6:2',
-        'E5:2', 'G5:2', 'C5:2', 'G4:2', 'E4:2', 'C4:2'
+        # プレリュード: 上昇アルペジオ
+        'C4:1', 'D4:1', 'E4:1', 'G4:1',
+        'C5:1', 'D5:1', 'E5:1', 'G5:1',
+        'C6:1', 'G5:1', 'E5:1', 'D5:1',
+        'C5:1', 'G4:1', 'E4:1', 'D4:1',
+        # 2巡目（半音上がったパターン）
+        'E4:1', 'G4:1', 'A4:1', 'C5:1',
+        'E5:1', 'G5:1', 'A5:1', 'C6:1',
+        'A5:1', 'G5:1', 'E5:1', 'C5:1',
+        'A4:1', 'G4:1', 'E4:1', 'C4:1',
     ]
 }
 
@@ -77,8 +94,14 @@ while True:
         shift = 0
         display.scroll("Key Reset")
     elif button_a.is_pressed():
-        sleep(800)
-        if button_a.is_pressed():
+        # 非ブロッキング長押し判定（50ms×16回 = 800ms）
+        held = True
+        for _ in range(16):
+            sleep(50)
+            if not button_a.is_pressed():
+                held = False
+                break
+        if held:
             # A長押し：前の曲
             prev_song()
         else:
@@ -87,8 +110,14 @@ while True:
                 shift -= 1
             display.scroll("Key: " + str(shift))
     elif button_b.is_pressed():
-        sleep(800)
-        if button_b.is_pressed():
+        # 非ブロッキング長押し判定（50ms×16回 = 800ms）
+        held = True
+        for _ in range(16):
+            sleep(50)
+            if not button_b.is_pressed():
+                held = False
+                break
+        if held:
             # B長押し：次の曲
             next_song()
         else:
